@@ -1,0 +1,38 @@
+{
+  "name": "goemerchant",
+  "version": "0.0.1",
+  "description": "GoEmerchant Gateway for 42 cent.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rojuinex/node-goemerchant.git"
+  },
+  "keywords": [
+    "42-cent",
+    "GoEmerchant",
+    "payment",
+    "gateway"
+  ],
+  "author": "Caleb 'Rojuinex'  Bartholomew <caleb@echobroadband.net> (http://calebbartholomew.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Rojuinex/node-goemerchant/issues"
+  },
+  "homepage": "https://github.com/Rojuinex/node-goemerchant#readme",
+  "dependencies": {
+    "42-cent-base": "^1.0.0",
+    "42-cent-model": "^2.0.2",
+    "bluebird": "^2.10.2",
+    "lodash": "^3.10.1",
+    "moment": "^2.10.6",
+    "request": "^2.65.0",
+    "xml2js": "^0.4.13"
+  },
+  "devDependencies": {
+    "mocha": "^2.3.3",
+    "node-uuid": "^1.4.3"
+  }
+}
