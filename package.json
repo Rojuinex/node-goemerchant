@@ -26,6 +26,7 @@
     "42-cent-base": "^1.0.0",
     "42-cent-model": "^2.0.2",
     "bluebird": "^2.10.2",
+    "colors": "^1.1.2",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
     "request": "^2.65.0",
