@@ -141,7 +141,7 @@ describe('GoEmerchant service', function() {
 	});
 
 	describe('get transactions', function() {
-		it('should be able to get settled batch transactions', function(done) {
+		xit('should be able to get settled batch transactions', function(done) {
 			this.timeout(10000);
 
 			service.getSettledBatchList(new Date(Date.now() - 30 * 24 * 3600 * 1000))
