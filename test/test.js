@@ -267,7 +267,7 @@ describe('GoEmerchant service', function() {
 				.withBillingPostalCode('12345-6789')
 				.withBillingState('TN')
 				.withBillingCountry('US')
-				.withBillingPhone('8019991001')
+				.withBillingPhone('8015555555')
 				.withBillingEmailAddress('yourmom@echobroadband.net');
 		});
 
