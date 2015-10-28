@@ -275,8 +275,6 @@ describe('GoEmerchant service', function() {
 			service.editCustomerProfile(cimid, cc)
 				.then((result)=> {
 					assert.equal(result.status, '1', 'Expected a status result of 1');
-					assert(cc.cardNumber.toString() === result.cardNumber, 'Returned card sequence did not match orignal sequence number.');
-					assert(result.maskedCC === result._original.masked_pan, 'Masked CC did not match');
 					done();
 				})
 				.catch((err)=>{
