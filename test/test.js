@@ -39,7 +39,7 @@ describe('GoEmerchant service', function() {
 
 		beforeEach(()=> {
 			cc = new CreditCard({cardType: 'Visa'})
-				.withCreditCardNumber('4111111111111111')
+				.withCreditCardNumber('4716389275666851')
 				.withExpirationYear(2020)
 				.withExpirationMonth('10')
 				.withCvv2('123');
@@ -92,7 +92,7 @@ describe('GoEmerchant service', function() {
 
 		beforeEach(()=> {
 			cc = new CreditCard({cardType: 'Visa'})
-				.withCreditCardNumber('4111111111111111')
+				.withCreditCardNumber('4716389275666851')
 				.withExpirationYear(2020)
 				.withExpirationMonth('10')
 				.withCvv2('123');
@@ -178,7 +178,7 @@ describe('GoEmerchant service', function() {
 
 		before(()=> {
 			cc = new CreditCard({cardType: 'Visa'})
-				.withCreditCardNumber('4111111111111111')
+				.withCreditCardNumber('4716389275666851')
 				.withExpirationYear(2020)
 				.withExpirationMonth('10')
 				.withCvv2('123');
