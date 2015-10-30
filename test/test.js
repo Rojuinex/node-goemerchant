@@ -2,6 +2,7 @@
 
 var assert = require('assert');
 var util   = require('util');
+let _      = require('lodash');
 
 var GatewayError       = require('42-cent-base').GatewayError;
 var GoEmerchantGateway = require('../index.js');
@@ -141,13 +142,13 @@ describe('GoEmerchant service', function() {
 	});
 
 	describe('get transactions', function() {
-		xit('should be able to get settled batch transactions', function(done) {
+		it('should be able to get settled batch transactions', function(done) {
 			this.timeout(10000);
 
 			service.getSettledBatchList(new Date(Date.now() - 30 * 24 * 3600 * 1000))
 				.then(function(response){
 					assert(response.status !== '0', 'Transaction status was 0');
-					assert.equal(response.status, response._original.status, 'Statuses do not match');
+					assert(response._original, 'original should be defined');
 					done();
 				})
 				.catch(function(err){
@@ -157,9 +158,111 @@ describe('GoEmerchant service', function() {
 	});
 
 	describe('refund transaction', function() {
-		it('should refund an already settled transaction');
-		it('should support partial refund');
-		it('should reject the promise if the gateway return error');
+		it('should refund an already settled transaction', function(done) {
+			this.timeout(20000);
+
+			service.getSettledBatchList(new Date(Date.now() - 30 * 24 * 3600 * 1000))
+				.then(function(response){
+					assert(response.status !== '0', 'Transaction status was 0');
+					assert(response._original, 'original should be defined');
+					assert(response.records.length > 0, 'Cannot test refund without at least 1 settled transaction.');
+
+					let xaction, i = 0;
+
+					do {
+						xaction = response.records[i];
+					} while(xaction.amount_credited >= xaction.amount_settled && i++ < response.records.length)
+
+					assert(i < response.records.length, 'Cound not find 1 setteled transaction that could be credited.');
+
+					service.refundTransaction(xaction.reference_number, {amount: xaction.amount_settled - xaction.amount_credited})
+						.then(function(response){
+							assert(_.isNull(response.error) || _.isUndefined(response.error), response.error);
+							assert(response.status === '1', 'status should be 1');
+							assert(response.total_transactions_credited === '1', 'total_transactions_credited should be 1');
+							assert(response.reference_number === xaction.reference_number, 'Reference numbers did not match');
+							assert(response._original, 'original should be defined');
+							done();
+						})
+						.catch(function(err) {
+							done(err);
+						});
+				})
+				.catch(function(err){
+					done(err);
+				});
+		});
+
+		it('should support partial refund', function(done) {
+			this.timeout(20000);
+
+			service.getSettledBatchList(new Date(Date.now() - 30 * 24 * 3600 * 1000))
+				.then(function(response){
+					assert(response.status !== '0', 'Transaction status was 0');
+					assert(response._original, 'original should be defined');
+					assert(response.records.length > 0, 'Cannot test refund without at least 1 settled transaction.');
+
+					let xaction, i = 0;
+
+					do {
+						xaction = response.records[i];
+					} while(xaction.amount_credited >= xaction.amount_settled && i++ < response.records.length)
+
+					assert(i < response.records.length, 'Cound not find 1 setteled transaction that could be credited.');
+
+					service.refundTransaction(xaction.reference_number, {amount: (xaction.amount_settled - xaction.amount_credited) * .5})
+						.then(function(response){
+							assert(_.isNull(response.error) || _.isUndefined(response.error), response.error);
+							assert(response.status === '1', 'status should be 1');
+							assert(response.total_transactions_credited === '1', 'total_transactions_credited should be 1');
+							assert(response.reference_number === xaction.reference_number, 'Reference numbers did not match');
+							assert(response._original, 'original should be defined');
+							done();
+						})
+						.catch(function(err) {
+							done(err);
+						});
+				})
+				.catch(function(err){
+					done(err);
+				});
+		});
+
+		it('should reject the promise if the gateway return error', function(done) {
+			this.timeout(20000);
+
+			service.getSettledBatchList(new Date(Date.now() - 30 * 24 * 3600 * 1000))
+				.then(function(response){
+					assert(response.status !== '0', 'Transaction status was 0');
+					assert(response._original, 'original should be defined');
+					assert(response.records.length > 0, 'Cannot test refund without at least 1 settled transaction.');
+
+					let xaction, i = 0;
+
+					do {
+						xaction = response.records[i];
+					} while(xaction.amount_credited >= xaction.amount_settled && i++ < response.records.length)
+
+					assert(i < response.records.length, 'Cound not find 1 setteled transaction that could be credited.');
+
+					service.refundTransaction('bad', {amount: (xaction.amount_settled - xaction.amount_credited) * 2})
+						.then(function(response){
+							throw new Error('should not get here');
+						})
+						.catch(function(rejection) {
+							assert(rejection instanceof GatewayError, 'should be an instance of GatewayError');
+							assert.equal(rejection.message, 'Required Fields Missing:  reference_number1 is an invalid reference number. It must be all digits and correspond to a previous transaction you have submitted. . ');
+							assert(rejection._original, 'original should be defined');
+							done();
+						})
+						.catch(function(err){
+							done(err);
+						});
+				})
+				.catch(function(err){
+					done(err);
+				});
+		});
 	});
 
 	describe('void transaction', function () {
