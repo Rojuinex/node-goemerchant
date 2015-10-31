@@ -510,8 +510,11 @@ describe('GoEmerchant service', function() {
 			
 		});
 
+		// In order to test bath cim sale, cim needs to exist at 
+		// time of sale (30min from upload).  You will need to
+		// manually delete created cims.
 		after(function(done){
-			let asyncFuncts = [];
+			/*let asyncFuncts = [];
 
 			function deleteCim (cimid, cb) {
 				service.deleteCustomerProfile(cimid)
@@ -530,7 +533,9 @@ describe('GoEmerchant service', function() {
 
 			async.parallel(asyncFuncts, function(error){
 				done(error);
-			});
+			});*/
+
+			done();
 		});
 
 		it('should be able to bulk charge customers', function(done){
