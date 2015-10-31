@@ -3,6 +3,7 @@
 var assert = require('assert');
 var util   = require('util');
 let _      = require('lodash');
+let async  = require('async');
 
 var GatewayError       = require('42-cent-base').GatewayError;
 var GoEmerchantGateway = require('../index.js');
@@ -15,6 +16,7 @@ var uuid = require('node-uuid');
 
 var conf = require('../config.json');
 
+//conf.batchEndpoint = 'http://localhost:2000';
 //conf.endpoint = 'http://localhost:2000';
 
 describe('GoEmerchant service', function() {
@@ -25,13 +27,11 @@ describe('GoEmerchant service', function() {
 		return Math.ceil(Math.random() * 300);
 	}
 
-	let cimid, gProspect;
+	let cimid;
 
 	before(function(){
 		cimid = uuid.v4() + '-TEST';
-	});
 
-	beforeEach(function() {
 		service = GoEmerchantGateway(conf);
 	});
 
@@ -289,7 +289,7 @@ describe('GoEmerchant service', function() {
 			order = new Order({id: uuid.v4()})
 				.withAmount(randomAmount());
 
-			gProspect = prospect = new Prospect()
+			prospect = new Prospect()
 				.withProfileId(cimid)
 				.withBillingLastName('Mom')
 				.withBillingFirstName('Your')
@@ -437,6 +437,128 @@ describe('GoEmerchant service', function() {
 				.catch((err)=>{
 					done(err);
 				});
+		});
+	});
+
+	describe('charge customers', function(){
+		let cimids = [];
+
+		// Change this to bulk CIM_INSERT when implemented
+		before(function(done){
+			async.parallel([
+				function(cb) {
+					let cc = new CreditCard({cardType: 'Visa'})
+						.withCreditCardNumber('4716389275666851')
+						.withExpirationYear(2020)
+						.withExpirationMonth('10')
+						.withCvv2('123');
+
+					let cimid = uuid.v4() + '-TEST';
+
+					let prospect = new Prospect()
+						.withProfileId(cimid)
+						.withBillingLastName('Mom')
+						.withBillingFirstName('Your')
+						.withBillingAddress1('123 Test St')
+						.withBillingCity('Springville')
+						.withBillingPostalCode('12345-6789')
+						.withBillingState('TN')
+						.withBillingCountry('US')
+						.withBillingPhone('8019991001')
+						.withBillingEmailAddress('yourmom@echobroadband.net');
+
+					service.createCustomerProfile(cc, prospect)
+						.then(function(result){
+							cimids.push(cimid);
+							cb();
+						})
+						.catch(function(error){
+							cb(error);
+						});
+				},
+				function(cb){
+					let cc = new CreditCard({cardType: 'Discover'})
+						.withCreditCardNumber('6011000995500000')
+						.withExpirationYear(2020)
+						.withExpirationMonth('10')
+						.withCvv2('123');
+
+					let cimid = uuid.v4() + '-TEST';
+
+					let prospect = new Prospect()
+						.withProfileId(cimid)
+						.withBillingLastName('Dad')
+						.withBillingFirstName('My')
+						.withBillingAddress1('123 Test St')
+						.withBillingCity('Bountiful')
+						.withBillingPostalCode('12345-6789')
+						.withBillingState('UT')
+						.withBillingCountry('US')
+						.withBillingPhone('8015555555')
+						.withBillingEmailAddress('mydad@echobroadband.net');
+
+					service.createCustomerProfile(cc, prospect)
+						.then(function(result){
+							cimids.push(cimid);
+							cb();
+						})
+						.catch(function(error){
+							cb(error);
+						});
+				}
+			], done);
+			
+		});
+
+		after(function(done){
+			let asyncFuncts = [];
+
+			function deleteCim (cimid, cb) {
+				service.deleteCustomerProfile(cimid)
+					.then(function(){})
+					.catch(function(e){
+						console.log('error deleting cim ' + cimid);
+					})
+					.finally(function(){
+						cb();
+					})
+			}
+
+			for(let i = 0; i < cimids.length; ++i) {
+				asyncFuncts.push(async.apply(deleteCim, cimids[i]));
+			}
+
+			async.parallel(asyncFuncts, function(error){
+				done(error);
+			});
+		});
+
+		it('should be able to bulk charge customers', function(done){
+			let batch = [];
+
+			for(let i = 0; i < cimids.length; ++i) {
+				batch.push({
+					profile: {
+						profileId: cimids[i]
+					}, 
+					order: {
+						id: uuid.v4(), 
+						amount: 1
+					}
+				});
+			}
+
+			service.chargeCustomers(batch)
+				.then(function(result){
+					assert(result.status === '1', 'Expected result status to be 1');
+					assert(result.fileId, 'fileId should be defined');
+					assert(result.message, 'message should be defined');
+					assert(result._original, 'original should be defined');
+					done();
+				})
+				.catch(function(error){
+					done(error);
+				})
 		});
 	});
 });

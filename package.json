@@ -1,6 +1,6 @@
 {
   "name": "goemerchant",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "GoEmerchant Gateway for 42 cent.",
   "main": "index.js",
   "scripts": {
@@ -27,13 +27,15 @@
     "42-cent-model": "^2.0.2",
     "bluebird": "^2.10.2",
     "colors": "^1.1.2",
+    "form-data": "^0.2.0",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
     "request": "^2.65.0",
-    "xml2js": "^0.4.13"
+    "xml2js": "^0.4.13",
+    "node-uuid": "^1.4.3"
   },
   "devDependencies": {
-    "mocha": "^2.3.3",
-    "node-uuid": "^1.4.3"
+    "async": "^1.5.0",
+    "mocha": "^2.3.3"
   }
 }
